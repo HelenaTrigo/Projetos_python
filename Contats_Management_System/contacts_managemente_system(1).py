@@ -1,8 +1,10 @@
-# classe contactos com os campos nome, telefone e email
+# definição de listas e variáveis
 contacts_list = []
 categories_list = ["trabalho", "família", "favoritos", "IEFP"]
 details_option = None
 
+
+# criação da classe e seus métodos
 class Contact:
     def __init__(self, nome, telemovel, email):
         self.name = nome
@@ -11,7 +13,7 @@ class Contact:
         self.email = email
         self.category = None
 
-    
+    # usada quando tento imprimir a lista de objetos
     def __str__(self) -> str:
         if not self.category and not self.other_mobile:
             return self.name + " - " + str(self.mobile) + " | " + self.email
@@ -28,6 +30,7 @@ class Contact:
     def __lt__(self, other):
         return self.name < other.name
 
+
 def show_contacts():
     if len(contacts_list) > 0:
         contacts_list.sort()
@@ -36,6 +39,7 @@ def show_contacts():
         # print(f"{contact.name} - {contact.mobile} | {contact.email}")
     else:
         print("Lista de Contactos vazia.\n")
+
 
 def see_contact(contact_id):
     print("------ DETALHES DO CONTACTO ------")
@@ -112,7 +116,7 @@ def add_to_category(contact_id):
     category_id = int(input("Indique a que categoria quer adicionar o contacto: "))
     contacts_list[contact_id].category = categories_list[category_id]
 
-# menu - inserir e listar
+# menu App
 menu_option = None
 
 while True:
@@ -142,6 +146,3 @@ while True:
         print(" A fechar aplicação...")
         quit()
 
-
-
-# lista = [("nome: "), "tlm: ")]
