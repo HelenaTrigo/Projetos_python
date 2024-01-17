@@ -1,7 +1,7 @@
 # ligação à base de dados
 import sqlite3
-connetion = sqlite3.connect("contacts.db")
-cursor = connetion.cursor()
+connection = sqlite3.connect("contacts.db")
+cursor = connection.cursor()
 
 # Definição das funções
 def show_contacts():
@@ -41,7 +41,7 @@ def add_contact():
     telemovel = input("Telemóvel: \n")
     email = input("E-mail: \n")
     cursor.execute("Insert into Contacts(name, mobile, email) values('{nome}', '{telemovel}', '{email}')")
-    connetion.commit()
+    connection.commit()
     print("Contacto adicionado com sucesso.\n")
 
 def change_contact(id_contact):
@@ -82,7 +82,7 @@ def change_contact(id_contact):
 
 def remove_contact(contact_id):
     cursor.execute("delete Contacts where id = '{contact_id}")
-    connetion.commit()
+    connection.commit()
     print("Contacto removido com sucesso.")
 
 
@@ -91,9 +91,9 @@ def add_to_category(id_contact):
     categories_list = cursor.fetchall()
     for category in categories_list:
         print(f"{categories_list[0] + 1} - {categories_list[1]}")
-    category_id = int(input("Indique a que categoria quer adicionar o contacto: "))
-    cursor.execute("update Contacts set category = "select category from Categorias where id = '{category_id}'" where id = '{contac_id}'")
-    cursor.commit()
+    category_id = int(input("Indique a que categoria quer adicionar o contacto: ")) - 1
+    cursor.execute("update Contacts set category = categories_list[{category_id}]")
+    connection.commit()
     print("Foi associado uma categoria ao seu contacto.")
 
 
@@ -106,6 +106,7 @@ cursor.execute("""create table if not exists 'Contacts'(
                 mobile text not null,
                 other_mobile text null,
                 email text null
+                category integer null foreign key references Categorias(id)
                 )
                """)
 
@@ -114,6 +115,13 @@ cursor.execute("""create table if not exists 'Categories'(
                    category text not null
                 )
                """)
+
+# criar relação entre as tabelas
+'''cursor.execute("ALTER TABLE Contactos
+                ADD CONSTRAINT FK_Category
+                FOREIGN KEY (category) REFERENCES Categorias(id)")
+conneciton.commit()
+'''
 
 # menu App
 menu_option = None
@@ -140,10 +148,10 @@ while True:
     elif menu_option == "4":
         new_category = input("Digite a categoria a criar: ")
         cursor.execute("insert into Categorias(name) values('{new_category}')")
-        cursor.commit()
+        connection.commit()
         print("\n Categoria adicionada com sucesso.\n")
     else:
         print(" A fechar aplicação...")
         # termina ligação à BD
-        connetion.close()
+        connection.close()
         quit()
