@@ -11,6 +11,7 @@ class Contact:
         self.email = email
         self.category = None
 
+    
     def __str__(self) -> str:
         if not self.category and not self.other_mobile:
             return self.name + " - " + str(self.mobile) + " | " + self.email
@@ -21,11 +22,15 @@ class Contact:
                 return self.category +"\n" + self.name + " - " + str(self.mobile) + " | " + self.email
             elif self.other_mobile:
                 return self.name + " - " + str(self.mobile) + " | " + self.email + "\nTelemóvel aternativo: " + str(self.other_mobile)
-
-# lista de objetos do tipo contacto
+    
+    
+    # usada quando tento ordenar ascendente a lista
+    def __lt__(self, other):
+        return self.name < other.name
 
 def show_contacts():
     if len(contacts_list) > 0:
+        contacts_list.sort()
         for contact in contacts_list:
             print(f"{contacts_list.index(contact) + 1} - {contact.name}")
         # print(f"{contact.name} - {contact.mobile} | {contact.email}")
@@ -50,7 +55,7 @@ def see_contact(contact_id):
 
 def add_contact():
     print("----- ADICIONAR CONTACTO -----\n")
-    nome = input("Nome : \n")
+    nome = input("Nome : \n").capitalize()
     telemovel = input("Telemóvel: \n")
     email = input("E-mail: \n")
     contact = Contact(nome, telemovel, email)
@@ -63,8 +68,9 @@ def change_contact(contact_id):
     change_name = input("Alterar nome? [S/N]").upper() == "S"
     if change_name:
         new_name = input("Nome: ")
-        contacts_list[contact_id].name = new_name
-        print("\nNome atualizado com sucesso.\n")
+        if new_name != "":
+            contacts_list[contact_id].name = new_name
+            print("\nNome atualizado com sucesso.\n")
     else:
         print("\nNome não foi alterado.\n")
     
