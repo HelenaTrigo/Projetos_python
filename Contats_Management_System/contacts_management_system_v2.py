@@ -127,7 +127,7 @@ cursor.execute("""create table if not exists 'Categories'(
 cursor.execute("select * from Categories")
 categories_list = cursor.fetchall()
 if len(categories_list) <= 0:
-    cursor.execute("insert into Categories(category) values(('Geral'), ('Família'), ('Trabalho'), ('Amigos')")   
+    cursor.execute("insert into Categories(category) values('Geral'), ('Família'), ('Trabalho'), ('Amigos')")   
 connection.commit()
 
 # criar relação entre as tabelas se ainda não existir
