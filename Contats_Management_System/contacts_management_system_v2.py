@@ -6,10 +6,10 @@ cursor = connection.cursor()
 # Definição das funções
 def show_contacts():
     print("------ LISTA DE CONTACTOS ------")
-    cursor.execute("Select id, name from Contacts order bu name")
+    cursor.execute("Select id, name from Contacts order by name")
     contacts_list = cursor.fetchall()
     if len(contacts_list) <= 0:
-        print("Lista de contactos vazia.)")
+        print("Lista de contactos vazia.\n")
     else:
         print(f"Número de contactos: {len(contacts_list)}\n")
         for contact in contacts_list:
@@ -17,20 +17,18 @@ def show_contacts():
 
 
 def see_contact(contact_id):
-    cursor.execute("select * from Contacts where id = '{contact_id}'")
+    cursor.execute(f"select Contacts.id, name, mobile, ifnull(email, 'sem email'), ifnull(other_mobile, 'sem contacto'), category from Contacts left join Categories on id_category = Categories.id where Contacts.id = '{contact_id}'")
     contact_detais = cursor.fetchone()
-    print(f"{contact_detais[1]} - {contact_detais[2]} | {contact_detais[4]}\N
-          {contact_detais[3]}"
-            )
+    print(f"{contact_detais[5]}\n{contact_detais[1]} - {contact_detais[2]} | {contact_detais[3]}\nTelemóvel alternativo: {contact_detais[4]}")
+   
     details_option = int(input ("1 - Alterar contacto\n2 - Remover contacto.\n3 - Adicionar o contacto a uma categoria.\n0 - Voltar\nO que deseja fazer? "))
     if details_option == 1:
-        # change_contact(contact_id)
-        pass
+        change_contact(contact_id)
     elif details_option == 2:
         print(contact_id)
         remove_contact(contact_id)
     elif details_option == 3:
-        # add_to_category(contact_id)
+        add_to_category(contact_id)
         pass
     elif details_option == 0:
         show_contacts()
@@ -40,7 +38,11 @@ def add_contact():
     nome = input("Nome : \n").capitalize()
     telemovel = input("Telemóvel: \n")
     email = input("E-mail: \n")
-    cursor.execute("Insert into Contacts(name, mobile, email) values('{nome}', '{telemovel}', '{email}')")
+    if email == '':
+        email = None
+        cursor.execute("Insert into Contacts(name, mobile) values('"+nome+"', '"+telemovel+"')")
+    else:
+          cursor.execute("Insert into Contacts(name, mobile, email) values('"+nome+"', '"+telemovel+"', '"+email+"')")
     connection.commit()
     print("Contacto adicionado com sucesso.\n")
 
@@ -50,7 +52,7 @@ def change_contact(id_contact):
     if change_name:
         new_name = input("Nome: ").capitalize()
         if new_name != "":
-            cursor.execute("update Contacts set name = '{new_name}' where id = '{contact_id}'")
+            cursor.execute(f"update Contacts set name = '{new_name}' where id = {contact_id}")
             print("\nNome atualizado com sucesso.\n")
     else:
         print("\nNome não foi alterado.\n")
@@ -60,11 +62,11 @@ def change_contact(id_contact):
         change_option = int(input("1 - Editar o número atual.\n2 - Adicionar um número alternativo. \n"))
         if change_option == 1:
             edited_mobile = input("telemóvel: ")
-            cursor.execute("update Contacts set mobile = '{edited_mobile}' where id = '{contact_id}'")
+            cursor.execute(f"update Contacts set mobile = '{edited_mobile}' where id = '{contact_id}'")
             print("\nTelemóvel atualizado com sucesso.\n")
         elif change_option == 2:
             other_mobile = input("Telemóvel alternativo: ")
-            cursor.execute("update Contacts set other_mobile = '{other_mobile}' where id = '{contact_id}'")
+            cursor.execute(f"update Contacts set other_mobile = '{other_mobile}' where id = '{contact_id}'")
             print("\nTelemóvel alternativo adicionado com sucesso.\n")
         else:
             print("Telemóvel não foi atualizado.\n")
@@ -72,27 +74,30 @@ def change_contact(id_contact):
     change_email = input("Alterar e-mail? [S/N]").upper() == "S"
     if change_email:
         new_email = input("E-mail: ")
-        cursor.execute("update Contacts set email = '{new_email}' where id = '{contact_id}'")
+        cursor.execute(f"update Contacts set email = '{new_email}' where id = '{contact_id}'")
         print("\nE-mail atualizado com sucesso\n")
     else:
         print("E-mail não foi atualizado.\n")
     
-    cursor.commit()
+    connection.commit()
     print("Contacto atualizado com sucesso.")
 
 def remove_contact(contact_id):
-    cursor.execute("delete Contacts where id = '{contact_id}")
+    cursor.execute(f"delete from Contacts where id = {contact_id}")
     connection.commit()
     print("Contacto removido com sucesso.")
 
 
-def add_to_category(id_contact):
+def add_to_category(contact_id):
     cursor.execute("Select * from Categories")
     categories_list = cursor.fetchall()
     for category in categories_list:
-        print(f"{categories_list[0] + 1} - {categories_list[1]}")
-    category_id = int(input("Indique a que categoria quer adicionar o contacto: ")) - 1
-    cursor.execute("update Contacts set category = categories_list[{category_id}]")
+        print(f"{category[0]} - {category[1]}")
+    category_id = int(input("Indique a que categoria quer adicionar o contacto: "))
+    while category_id > len(categories_list):
+        print("Erro!! A categoria selecionada não existe!")
+        category_id = int(input("Indique a que categoria quer adicionar o contacto: "))
+    cursor.execute(f"update Contacts set id_category = {category_id} where Contacts.id = {contact_id}")
     connection.commit()
     print("Foi associado uma categoria ao seu contacto.")
 
@@ -101,13 +106,16 @@ def add_to_category(id_contact):
 
 # criação das tabelas
 cursor.execute("""create table if not exists 'Contacts'(
-                id integer primary key,
-                name text not null,
-                mobile text not null,
-                other_mobile text null,
-                email text null
-                category integer null foreign key references Categorias(id)
-                )
+                    id integer primary key,
+                    name text not null,
+                    mobile text not null,
+                    other_mobile text null,
+                    email text null,
+                    id_category integer not null default 1, foreign key (id_category)
+                        references Categories(id)
+                            on delete set null
+                            on update cascade
+                    )
                """)
 
 cursor.execute("""create table if not exists 'Categories'(
@@ -116,10 +124,16 @@ cursor.execute("""create table if not exists 'Categories'(
                 )
                """)
 
-# criar relação entre as tabelas
-'''cursor.execute("ALTER TABLE Contactos
+cursor.execute("select * from Categories")
+categories_list = cursor.fetchall()
+if len(categories_list) <= 0:
+    cursor.execute("insert into Categories(category) values(('Geral'), ('Família'), ('Trabalho'), ('Amigos')")   
+connection.commit()
+
+# criar relação entre as tabelas se ainda não existir
+'''cursor.execute("ALTER TABLE Contacts
                 ADD CONSTRAINT FK_Category
-                FOREIGN KEY (category) REFERENCES Categorias(id)")
+                FOREIGN KEY (category) REFERENCES Categories(id)")
 conneciton.commit()
 '''
 
@@ -127,7 +141,7 @@ conneciton.commit()
 menu_option = None
 
 while True:
-    print("----- LISTA DE CONTACTOS ------\n"
+    print("----- MENU DE CONTACTOS ------\n"
           "1 - Ver lista de contatos\n"
           "2 - Ver detalhes do contacto\n"
           "3 - Adicionar contacto\n"
@@ -141,13 +155,13 @@ while True:
     if menu_option == "1":
         show_contacts()
     elif menu_option == "2":
-        contact_id = int(input("Indique o Id do contacto que quer ver os detalhes: ")) - 1
+        contact_id = int(input("Indique o id do contacto que quer ver os detalhes: "))
         see_contact(contact_id)
     elif menu_option == "3":
         add_contact()
     elif menu_option == "4":
         new_category = input("Digite a categoria a criar: ")
-        cursor.execute("insert into Categorias(name) values('{new_category}')")
+        cursor.execute("insert into Categories(category) values('"+new_category+"')")
         connection.commit()
         print("\n Categoria adicionada com sucesso.\n")
     else:
