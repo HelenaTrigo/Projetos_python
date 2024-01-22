@@ -5,62 +5,38 @@ cursor = connection.cursor()
 
 # Definição das funções
 def show_contacts():
+    all_categories_list = []
+    tt_contacts = 0
     print("------ LISTA DE CONTACTOS ------")
-    cursor.execute('''
-                    SELECT id, name FROM Contacts 
-                        where id_category = 1
-                        order by name''')
-    category1_list = cursor.fetchall()
-    cursor.execute('''
-                    SELECT id, name FROM Contacts
-                        where id_category = 2             
-                        order by name''')
-    category2_list = cursor.fetchall()
-    cursor.execute('''
-                    SELECT id, name FROM Contacts
-                        where id_category = 3 
-                        order by name''')
-    category3_list = cursor.fetchall()
-    cursor.execute('''
-                    SELECT id,  name FROM Contacts
-                        where id_category = 4 
-                        order by name'''
-                   )
-    category4_list = cursor.fetchall()
-    tt_contatcs  = len(category1_list) + len(category2_list) + len(category3_list) + len(category4_list)
-    print(f"Número de contactos: {tt_contatcs}\n")
-    if tt_contatcs <= 0:
+    cursor.execute("select count(id) from Categories")
+    max_range = cursor.fetchone()
+   
+    for _ in range(1, max_range[0] + 1):
+        cursor.execute(f'''
+                        SELECT id, name FROM Contacts 
+                            where id_category = {_}
+                            order by name''')
+        category_list = cursor.fetchall()
+        tt_contacts  += len(category_list)
+        all_categories_list.append(category_list)
+    
+    print(f"Número de contactos: {tt_contacts}\n")
+    if  tt_contacts <= 0:
         print("Lista de contactos vazia.\n")
     else:
-        for _ in range[1, cursor.execute("select count(id) from Categories")]:
-            print("----- CONTACTOS EM {category_name}} -----")
-            if len(category1_list) <= 0:
-                    print("Sem contactos na categoria .")
+        cursor.execute("select count(id) from Categories")
+        max_range = cursor.fetchone()
+        
+        for _ in range(1, max_range[0] + 1):
+            cursor.execute(f"select category from Categories where id = {_}")
+            category_name = cursor.fetchone()
+            print(f"----- CONTACTOS EM {category_name[0].upper()} -----")
+            if len(all_categories_list[_ - 1]) <= 0:
+                    print(f"Sem contactos na categoria {category_name[0].capitalize()}.")
             else:
-                for contact in category1_list:
+                for contact in all_categories_list[_ - 1]:
                     print(f"{contact[0]} - {contact[1]}")
             print("")
-        print("----- CONTACTOS EM FAMÍLIA -----")
-        if len(category2_list) <= 0:
-                print("Sem contactos na categoria Família.")
-        else:
-            for contact in category2_list:
-                print(f"{contact[0]} - {contact[1]}")
-        print("")
-        print("----- CONTACTOS EM TRABALHO -----")
-        if len(category3_list) <= 0:
-                print("Sem contactos na categoria Trabalho.")
-        else:    
-            for contact in category3_list:
-                print(f"{contact[0]} - {contact[1]}")
-        print("")
-        print("----- CONTACTOS EM AMIGOS -----")
-        if len(category4_list) <= 0:
-                print("Sem contactos na categoria Amigos.")
-        else:
-            for contact in category4_list:
-                print(f"{contact[0]} - {contact[1]}")
-        print("")
 
 
 def see_contact(contact_id):
