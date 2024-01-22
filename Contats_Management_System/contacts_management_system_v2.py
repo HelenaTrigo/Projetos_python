@@ -6,14 +6,61 @@ cursor = connection.cursor()
 # Definição das funções
 def show_contacts():
     print("------ LISTA DE CONTACTOS ------")
-    cursor.execute("Select id, name from Contacts order by name")
-    contacts_list = cursor.fetchall()
-    if len(contacts_list) <= 0:
+    cursor.execute('''
+                    SELECT id, name FROM Contacts 
+                        where id_category = 1
+                        order by name''')
+    category1_list = cursor.fetchall()
+    cursor.execute('''
+                    SELECT id, name FROM Contacts
+                        where id_category = 2             
+                        order by name''')
+    category2_list = cursor.fetchall()
+    cursor.execute('''
+                    SELECT id, name FROM Contacts
+                        where id_category = 3 
+                        order by name''')
+    category3_list = cursor.fetchall()
+    cursor.execute('''
+                    SELECT id,  name FROM Contacts
+                        where id_category = 4 
+                        order by name'''
+                   )
+    category4_list = cursor.fetchall()
+    tt_contatcs  = len(category1_list) + len(category2_list) + len(category3_list) + len(category4_list)
+    print(f"Número de contactos: {tt_contatcs}\n")
+    if tt_contatcs <= 0:
         print("Lista de contactos vazia.\n")
     else:
-        print(f"Número de contactos: {len(contacts_list)}\n")
-        for contact in contacts_list:
-            print(f"{contact[0]} - {contact[1]}")
+        for _ in range[1, cursor.execute("select count(id) from Categories")]:
+            print("----- CONTACTOS EM {category_name}} -----")
+            if len(category1_list) <= 0:
+                    print("Sem contactos na categoria .")
+            else:
+                for contact in category1_list:
+                    print(f"{contact[0]} - {contact[1]}")
+            print("")
+        print("----- CONTACTOS EM FAMÍLIA -----")
+        if len(category2_list) <= 0:
+                print("Sem contactos na categoria Família.")
+        else:
+            for contact in category2_list:
+                print(f"{contact[0]} - {contact[1]}")
+        print("")
+        print("----- CONTACTOS EM TRABALHO -----")
+        if len(category3_list) <= 0:
+                print("Sem contactos na categoria Trabalho.")
+        else:    
+            for contact in category3_list:
+                print(f"{contact[0]} - {contact[1]}")
+        print("")
+        print("----- CONTACTOS EM AMIGOS -----")
+        if len(category4_list) <= 0:
+                print("Sem contactos na categoria Amigos.")
+        else:
+            for contact in category4_list:
+                print(f"{contact[0]} - {contact[1]}")
+        print("")
 
 
 def see_contact(contact_id):
